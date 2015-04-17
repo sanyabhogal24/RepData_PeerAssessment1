@@ -1,7 +1,11 @@
-Reproducible  Research - Peer Assessment 1
+Reproducible  Research : Peer Assessment 1
 ===========================================
 
 ##Loading and preprocessing the data
+```{r setoptions}
+library(knitr)
+opts_chunk$set(echo=TRUE)
+```
 
 ```{r loading}
 library(dplyr)
@@ -9,13 +13,13 @@ library(ggplot2)
 activityData=read.csv("activity.csv")
 activityData$date=as.Date(activityData$date,format="%Y-%m-%d")
 activityData$stepsNA=is.na(activityData$steps)
-
 activityData_withoutNA=subset(activityData,stepsNA==FALSE)
 activityData_withoutNA=activityData_withoutNA[,-4]
-
 activityData_withNA=subset(activityData,stepsNA==TRUE)
 activityData_withNA=activityData_withNA[,-4]
 ```
+
+
 
 
 ##What is mean total number of steps taken per day?
@@ -23,33 +27,43 @@ activityData_withNA=activityData_withNA[,-4]
 ```{r mean_steps}
 grouped_activityData=group_by(activityData_withoutNA,date)
 summarized_activityData=summarize(grouped_activityData,steps=sum(steps))
+hist(summarized_activityData$steps, breaks=20, main="Total Number of Steps Taken Each Day", xlab="Total Steps taken daily")
+meanSteps=mean(summarized_activityData$steps)
+medianSteps=median(summarized_activityData$steps)
 
-hist(summarized_activityData$steps, breaks=20, main="Total Number of Steps Taken Each Day", xlab="Daily Total Steps")
-
-
-mean(summarized_activityData$steps)
-median(summarized_activityData$steps)
 ```
+
+* The mean of total number of steps taken per day is `r meanSteps`
+
+* The median of total number of steps taken per day is `r medianSteps`
+
+
+
+
 
 ##What is the average daily activity pattern?
 
 ```{r daily_activity_pattern}
 grouped_activityData=group_by(activityData,interval)
 summarized_activityData=summarize(grouped_activityData,steps=mean(steps,na.rm=TRUE))
-plot(summarized_activityData$interval,summarized_activityData$steps,type="l")
-summarized_activityData[summarized_activityData$steps==max(summarized_activityData$steps),][1]
+plot(summarized_activityData$interval,summarized_activityData$steps,type="l",xlab="Interval",ylab="Average steps of all days")
+maxInterval=summarized_activityData[summarized_activityData$steps==max(summarized_activityData$steps),][1]
+maxSteps=summarized_activityData[summarized_activityData$steps==max(summarized_activityData$steps),][2]
+
 ```
+
+* The 5 minute interval `r maxInterval` contains the maximum number of steps ie. `r maxSteps` steps, on average across all days in the dataset.
+
+
+
+
 
 ##Imputing missing values
 
 ```{r imputing_NAs}
-table(complete.cases(activityData))[1]
-
+missingVals=table(complete.cases(activityData))[1]
 grouped_activityData=group_by(activityData,interval)
 summarized_activityData=summarize(grouped_activityData,steps=mean(steps,na.rm=TRUE))
-
-
-
 m=merge(activityData,summarized_activityData,by="interval",all=TRUE)
 for(i in 1:nrow(m)){
   if(is.na(m$steps.x[i])){
@@ -60,22 +74,31 @@ m=m[,-4]
 new_activity_data=m
 grouped_activityData=group_by(new_activity_data,date)
 summarized_activityData=summarize(grouped_activityData,steps=sum(steps.x))
+hist(summarized_activityData$steps, breaks=20, main="Total Number of Steps Taken Each Day", xlab="Total Steps taken daily")
 
-hist(summarized_activityData$steps, breaks=20, main="Total Number of Steps Taken Each Day", xlab="Daily Total Steps")
+newMeanSteps=mean(summarized_activityData$steps)
+newMedianSteps=median(summarized_activityData$steps)
 
-mean(summarized_activityData$steps)
-median(summarized_activityData$steps)
 ```
+
+* There are `r missingVals` missing values in the dataset ie. total number of rows with NAs.
+
+* The strategy used to impute missing values in the step variable is to replace the NAs with the mean for that 5 minute interval. 
+
+* The mean of total number of steps taken per day is `r newMeanSteps`
+The median of total number of steps taken per day is `r newMedianSteps`
+
+* The mean after imputing NAs is the same as before imputing NAs but the median has slighly increased by imputing missing values.
+
+
+
+
 
 ##Are there differences in activity patterns between weekdays and weekends?
 
 ```{r weekend_weekday_pattern}
 new_activity_data$weekdays=weekdays(new_activity_data$date)
-
-
-new_activity_data$day<-ifelse((weekdays(new_activity_data$date) %in% c("Monday","Tuesday","Wednesday","Thursday","Friday")), 
-                         "Weekday","Weekend")
-
+new_activity_data$day<-ifelse((weekdays(new_activity_data$date) %in% c("Monday","Tuesday","Wednesday","Thursday","Friday")), "Weekday","Weekend")
 grouped_activityData=group_by(new_activity_data,interval,day)
 summarized_activityData=summarize(grouped_activityData,steps=mean(steps.x))
 
