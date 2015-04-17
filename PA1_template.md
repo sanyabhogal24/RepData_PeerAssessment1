@@ -54,7 +54,7 @@ medianSteps=median(summarized_activityData$steps)
 ```r
 grouped_activityData=group_by(activityData,interval)
 summarized_activityData=summarize(grouped_activityData,steps=mean(steps,na.rm=TRUE))
-plot(summarized_activityData$interval,summarized_activityData$steps,type="l",xlab="Interval",ylab="Average steps of all days")
+plot(summarized_activityData$interval,summarized_activityData$steps,type="l",xlab="5-minute intervals",ylab="Average no. of steps across all days")
 ```
 
 ![plot of chunk daily_activity_pattern](figure/daily_activity_pattern-1.png) 

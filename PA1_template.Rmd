@@ -46,7 +46,7 @@ medianSteps=median(summarized_activityData$steps)
 ```{r daily_activity_pattern}
 grouped_activityData=group_by(activityData,interval)
 summarized_activityData=summarize(grouped_activityData,steps=mean(steps,na.rm=TRUE))
-plot(summarized_activityData$interval,summarized_activityData$steps,type="l",xlab="Interval",ylab="Average steps of all days")
+plot(summarized_activityData$interval,summarized_activityData$steps,type="l",xlab="5-minute intervals",ylab="Average no. of steps across all days")
 maxInterval=summarized_activityData[summarized_activityData$steps==max(summarized_activityData$steps),][1]
 maxSteps=summarized_activityData[summarized_activityData$steps==max(summarized_activityData$steps),][2]
 
